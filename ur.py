@@ -27,7 +27,7 @@ LCD_E  = 8
 LCD_D4 = 25
 LCD_D5 = 24
 LCD_D6 = 23
-LCD_D7 = 18
+LCD_D7 = 26
 
 # Define some device constants
 LCD_WIDTH = 20    # Maximum characters per line
@@ -41,6 +41,7 @@ LCD_LINE_2 = 0xC0 # LCD RAM address for the 2nd line
 E_PULSE = 0.0005
 E_DELAY = 0.0005
 
+
 def main():
   # Main program block
   GPIO.setwarnings(False)
@@ -51,41 +52,35 @@ def main():
   GPIO.setup(LCD_D5, GPIO.OUT) # DB5
   GPIO.setup(LCD_D6, GPIO.OUT) # DB6
   GPIO.setup(LCD_D7, GPIO.OUT) # DB7
+  GPIO.setup(18, GPIO.OUT)
+
 
   # Initialise display
   lcd_init()
-
+  p = GPIO.PWM(18, 1000)
+  p.start(50)
   while True:
 
 
     ur = datetime.datetime.now()
+    if ur.strftime("%a") == "Mon":
+      dag(0x80,0x4D,0x61,0x6E,0x64,0x61,0x01,0xFE) # start adresse = 0x80, og derefter karakter ,0x4D,0x61,0x6E,0x64,0x61,0x01,0xFE
+    if ur.strftime("%a") == "Tue":
+      dag(0x80,0x54,0x69,0x72,0x73,0x64,0x61,0x01) # start adresse = 0x80, og derefter karakter ,0x54,0x69,0x72,0x73,0x64,0x61,0x01
+    if ur.strftime("%a") == "Wed":
+      dag(0x80,0x4F,0x6E,0x73,0x64,0x61,0x01,0xFE) # start adresse = 0x80, og derefter karakter ,0x4F,0x6E,0x73,0x64,0x61,0x01,0xFE
+    if ur.strftime("%a") == "Thu":
+      dag(0x80,0x54,0x6F,0x72,0x73,0x64,0x61,0x01) # start adresse = 0x80, og derefter karakter ,0x54,0x6F,0x72,0x73,0x64,0x61,0x01
+    if ur.strftime("%a") == "Fri":
+      dag(0x80,0x46,0x72,0x65,0x64,0x61,0x01,0xFE) # start adresse = 0x80, og derefter karakter ,0x46,0x72,0x65,0x64,0x61,0x01,0xFE
     if ur.strftime("%a") == "Sat":
-      dag = "Loerdag"
-    #g = lcd_byte(0x62,LCD_CHR)
+      dag(0x80,0x4C,0x00,0x72,0x64,0x61,0x01,0xFE) # start adresse = 0x80, og derefter karakter ,0x4C,0x00,0x72,0x64,0x61,0x01,0xFE
+    if ur.strftime("%a") == "Sun":
+      dag(0x80,0x53,0x00,0x6E,0x64,0x61,0x01,0xFE) # start adresse = 0x80, og derefter karakter ,0x53,0x00,0x6E,0x64,0x61,0x01,0xFE
     f = open("tid.txt",'r')
-    #lcd_byte(0x83,LCD_CMD)
-    #lcd_byte(0x80,LCD_CMD)
-    lcd_byte(0x40,LCD_CMD)
 
-    lcd_byte(0x00,LCD_CHR)
-    lcd_byte(0x00,LCD_CHR)
-    lcd_byte(0x0E,LCD_CHR)
-    lcd_byte(0x11,LCD_CHR)
-    lcd_byte(0x15,LCD_CHR)
-    lcd_byte(0x11,LCD_CHR)
-    lcd_byte(0x0E,LCD_CHR)
-    lcd_byte(0x1F,LCD_CHR)
-
- #   lcd_byte(0xFF,LCD_CHR)
-    lcd_byte(0x80, LCD_CMD)
-    lcd_byte(0x4C, LCD_CHR)
-    lcd_byte(0x00, LCD_CHR)
-    lcd_byte(0x72, LCD_CHR)
-    lcd_byte(0x64, LCD_CHR)
-    lcd_byte(0x61, LCD_CHR)
-    lcd_byte(0x67, LCD_CHR)
-    #lcd_string(g  + ur.strftime("  %d %b %Y"),LCD_LINE_1)
-    lcd_string(ur.strftime("Klokken %H:%M:%S"),LCD_LINE_2)
+    lcd_string(ur.strftime("  %d %b %Y"),0x87)
+    lcd_string(ur.strftime("Klokken er %H:%M:%S") ,LCD_LINE_2)
 
 def lcd_init():
   # Initialise display
@@ -96,7 +91,40 @@ def lcd_init():
   lcd_byte(0x28,LCD_CMD) # 101000 Data length, number of lines, font size
   lcd_byte(0x01,LCD_CMD) # 000001 Clear display
   time.sleep(E_DELAY)
- 
+
+  lcd_byte(0x40,LCD_CMD)  # saetter adr for gcram
+  lcd_byte(0x00,LCD_CHR)  # vaerdi for foerste linie  karakter oe paa dansk
+  lcd_byte(0x00,LCD_CHR)  # vaerdi for anden linie
+  lcd_byte(0x0E,LCD_CHR)  # vaerdi for tredie linie
+  lcd_byte(0x11,LCD_CHR)  # vaerdi for fjerde linie
+  lcd_byte(0x15,LCD_CHR)  # vaerdi for femte linie
+  lcd_byte(0x11,LCD_CHR)  # vaerdi for sjete linie
+  lcd_byte(0x0E,LCD_CHR)  # vaerdi for syvende linie
+  lcd_byte(0x00,LCD_CHR)  # vaerdi for ottende linie
+
+  lcd_byte(0x48,LCD_CMD)
+  lcd_byte(0x00,LCD_CHR)
+  lcd_byte(0x00,LCD_CHR)
+  lcd_byte(0x0F,LCD_CHR)
+  lcd_byte(0x11,LCD_CHR)
+  lcd_byte(0x11,LCD_CHR)
+  lcd_byte(0x0F,LCD_CHR)
+  lcd_byte(0x01,LCD_CHR)
+  lcd_byte(0x0E,LCD_CHR)
+
+
+def dag(a,b,c,d,e,f,g,h):
+  lcd_byte(a, LCD_CMD)
+  lcd_byte(b, LCD_CHR)
+  lcd_byte(c, LCD_CHR)
+  lcd_byte(d, LCD_CHR)
+  lcd_byte(e, LCD_CHR)
+  lcd_byte(f, LCD_CHR)
+  lcd_byte(g, LCD_CHR)
+  lcd_byte(h, LCD_CHR)
+
+
+
 def lcd_byte(bits, mode):
   # Send byte to data pins
   # bits = data
